@@ -1,0 +1,22 @@
+# Secrets / credentials
+.env
+*.pem
+*token*
+kubeconfig
+.kube/
+
+# AWS
+.aws/
+
+# OS
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Claude Code local config
+.claude/
+
+# Course material (not for redistribution)
+llm-d_Course.pdf

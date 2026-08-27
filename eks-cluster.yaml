@@ -1,0 +1,20 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: llm-d-bench
+  region: us-east-1
+  version: "1.31"
+
+managedNodeGroups:
+  - name: gpu-workers
+    instanceType: g6.xlarge
+    amiFamily: AL2_x86_64_GPU
+    desiredCapacity: 2
+    minSize: 2
+    maxSize: 2
+    volumeSize: 100
+    labels:
+      workload: llm-d-gpu
+    tags:
+      project: llm-d-benchmark
