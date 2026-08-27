@@ -1,4 +1,4 @@
-# llm-d vs. vLLM: Measuring the Real Benefit of Disaggregated Inference Serving
+# KV-Cache-Aware Routing with llm-d
 
 A hands-on benchmark project comparing [llm-d](https://llm-d.ai) (a Kubernetes-native distributed inference stack built on vLLM) against a plain vLLM deployment, to quantify what KV-cache-aware routing and disaggregated prefill/decode actually buy you in throughput and latency.
 
@@ -23,6 +23,16 @@ llm-d addresses both with a smart Inference Gateway (EndpointPicker) and disaggr
 - **Serving engine:** vLLM
 - **Orchestration:** Kubernetes (EKS) + llm-d Helm charts (`llm-d-deployer`) + Gateway API Inference Extension
 
+### Estimated cost
+
+| Item | Rate |
+|---|---|
+| EKS control plane | $0.10/hr |
+| 2x `g6.xlarge` (1x NVIDIA L4 each) | $0.8048/hr each (~$1.61/hr combined) |
+| **Total while cluster is running** | **≈ $1.72/hr** |
+
+Cluster is torn down (`eksctl delete cluster`) as soon as both benchmark runs are complete — billing runs whether or not anything is deployed on the nodes.
+
 ## Benchmark methodology
 
 Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_serving.py` against a ShareGPT-style mixed workload of short and long prompts, including simulated multi-turn conversations) and compared on:
@@ -34,6 +44,7 @@ Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_ser
 
 - [x] Architecture research and benchmark design
 - [x] Provisioned GPU compute, hit and resolved infra blockers (see [`ISSUES_LOG.md`](./ISSUES_LOG.md))
+- [x] AWS GPU quota approved, EKS cluster config (`eks-cluster.yaml`) ready to launch
 - [ ] EKS cluster with GPU node group live
 - [ ] Baseline vLLM deployment + benchmark run
 - [ ] llm-d deployment + benchmark run
