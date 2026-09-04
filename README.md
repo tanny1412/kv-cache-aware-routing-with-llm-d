@@ -58,7 +58,13 @@ See [`ISSUES_LOG.md`](./ISSUES_LOG.md) for a real-time log of problems hit along
 
 ## Results
 
-_TBD — will be filled in once both benchmark runs are complete._
+**Baseline concurrency/latency curve** (plain vLLM, 2 replicas, round-robin — no cache-aware routing, no disaggregation):
+
+![Baseline load curve: TTFT and throughput vs. concurrency](./benchmark/baseline_load_curve.png)
+
+TTFT holds under 75ms through concurrency 16, then climbs sharply — P90 reaches 219ms at concurrency 64, a ~4.8x increase over the single-request baseline — while throughput keeps scaling close to linearly. That gap between "throughput is fine" and "latency is degrading" is exactly the contention llm-d's disaggregated prefill/decode is meant to relieve; the llm-d curve will be overlaid here once that deployment and its matching benchmark run are complete.
+
+_Multi-turn cache-routing comparison (baseline vs. llm-d): pending llm-d deployment._
 
 ## Acknowledgments
 
