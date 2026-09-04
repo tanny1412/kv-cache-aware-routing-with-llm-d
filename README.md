@@ -16,6 +16,8 @@ llm-d addresses both with a smart Inference Gateway (EndpointPicker) and disaggr
 
 **llm-d:** Same 2 GPUs, reconfigured as 1 dedicated prefill worker + 1 dedicated decode worker, registered in a single `InferencePool` behind llm-d's Inference Gateway. The EndpointPicker (EPP) routes each request based on real-time KV-cache/GPU utilization signals rather than round-robin, and orchestrates the prefill → KV-cache-transfer → decode handoff via NIXL.
 
+> **Note on networking:** `g6.xlarge` nodes don't support RDMA-capable networking (e.g. AWS EFA), so NIXL falls back to its TCP transport for cross-node KV cache transfer instead of RDMA/InfiniBand. This means the absolute numbers here understate llm-d's best-case performance on production RDMA hardware — but the head-to-head comparison against the baseline is still valid, since it isolates the same variable (smart routing + disaggregation vs. none) under an equivalent network ceiling.
+
 ## Infrastructure
 
 - **Cluster:** AWS EKS with a managed GPU node group — 2x `g6.xlarge` (1x NVIDIA L4, 24GB VRAM each), one node per role (prefill / decode).
@@ -35,8 +37,8 @@ Cluster is torn down (`eksctl delete cluster`) as soon as both benchmark runs ar
 
 ## Benchmark methodology
 
-Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_serving.py` against a ShareGPT-style mixed workload of short and long prompts, including simulated multi-turn conversations) and compared on:
-- Time-to-first-token (TTFT), P50/P90
+Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_serving.py` against a ShareGPT-style mixed workload of short and long prompts, including simulated multi-turn conversations), swept across multiple concurrency levels (1, 4, 8, 16, 32, 64 concurrent requests) rather than a single load point — the goal is to see *where* and *how much* the two deployments diverge as contention increases, not just how each performs at one arbitrary load level. Compared on:
+- Time-to-first-token (TTFT), P50/P90, plotted against concurrency
 - Inter-token latency (ITL)
 - Overall throughput (tokens/sec)
 
@@ -46,7 +48,9 @@ Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_ser
 - [x] Provisioned GPU compute, hit and resolved infra blockers (see [`ISSUES_LOG.md`](./ISSUES_LOG.md))
 - [x] AWS GPU quota approved, EKS cluster config (`eks-cluster.yaml`) ready to launch
 - [ ] EKS cluster with GPU node group live
-- [ ] Baseline vLLM deployment + benchmark run
+- [x] Baseline vLLM deployment live and validated (2 replicas, 1 GPU each, confirmed serving real completions)
+- [x] Benchmark #1 complete: baseline multi-turn cache-routing test (`benchmark/baseline_multiturn.json`) and load-curve test across concurrency 1-64 (`benchmark/baseline_load_curve.json`), both using real ShareGPT conversations/prompts
+- [ ] Deploy llm-d, re-run both benchmarks for comparison
 - [ ] llm-d deployment + benchmark run
 - [ ] Results writeup and comparison
 

@@ -1,0 +1,97 @@
+[
+  [
+    "continue",
+    "Continue",
+    "create detailed leavePolicy nodejs"
+  ],
+  [
+    "Expand on specific aim 1",
+    "Provide citations for specific aim 1",
+    "Expand on specific aim 3",
+    "citations for specific aim 3"
+  ],
+  [
+    "continue from where you left off.",
+    "Rewrite the writing piece with in-text citations included in 2500 words or more.",
+    "continue from where you left off."
+  ],
+  [
+    "continue",
+    "tell me this about the story : if all life is extinguished, how can there be survivors",
+    "Yes, but you said that all live was extinguished.",
+    "Both of the above cannot be true."
+  ],
+  [
+    "how can i upload images from google photo to google drive using api?",
+    "how can i create the credentials?",
+    "is it possible to automate refreshing OAuth 2.0 credentials token using python, such as bs4, selenium?"
+  ],
+  [
+    "Continue writing please",
+    "base on the 90 day calendar, what products do I need to have created, please be detailed and tell me how to create them",
+    "i want to focus on more digital products, please share that list again with this in mind"
+  ],
+  [
+    "can you use the best practices you mentioned in the dockerfiles you wrote? btw the healthy microservice needs to be in python too not nodejs",
+    "Write helm-charts for both services",
+    "The Rest Api should be deployed with high-availability (2 replicas) on the cluster."
+  ],
+  [
+    "pretend that you're hiring for a visa compliance administrator role",
+    "this role would be more administrative and would not require specific visa knowledge. What questions would you ask in the interview knowing this?",
+    "Can you give me more questions that may be more relative to admin based tasks?"
+  ],
+  [
+    "assume campaign state can be modified independent of ad group and keywords within",
+    "would it make sense to separate the campaign into it's own row?",
+    "is this the most optimal structure?",
+    "there could be a case where customer needs to update an existing campaign and create a new campaign in the same import. should the structure change?"
+  ],
+  [
+    "Again the output is partial function, can you generate remaining function after \"//Replace the placeholder with new paragraph\" comment",
+    "Thanks, now I want to do same for generating pdf files, what are my options?",
+    "I dont want to use any commercial/paid library like itextsharp, I just want to use open source library (which is well maintained), what are my options again?"
+  ],
+  [
+    "create a react hook which attaches an icon to the cursor when hovering over a html element containing the class \"editable\"",
+    "the cursor itself should not change, there should be a icon following the cursor. the icon should be a font awesome pencil",
+    "you're currently attaching to the mousemove of elements known when `useEffect` is run. but what if elements change in runtime, after `useEffect` is run for the first time?"
+  ],
+  [
+    "I encounter an error when compiling test\\_cp\\_range: test\\_cp\\_range.c: In function `main':\ntest\\_cp\\_range.c:32: error: 'for' loop initial declaration used outside C99 mode\ntest\\_cp\\_range.c:47: error: redefinition of 'i'\ntest\\_cp\\_range.c:32: error: previous definition of 'i' was here\ntest\\_cp\\_range.c:47: error: 'for' loop initial declaration used outside C99 mode",
+    "I am kind of confuse about 'array' in the test program",
+    "Why we should assign value for 'array' each time"
+  ],
+  [
+    "you are expert in Angular development",
+    "Explain the Angular code I am going send you very throughly line by line while teaching me angular and the basics I need to understand to become a pro.",
+    "To view one or more targets against a portfolio, select and load from the subscribed\n targets on top.\n \n\n\n\n\nTargets {{ targetsStatus }}\n\n\n\n {{ createOrdersTooltip }}\n\n\n\n \n Would you like to cancel the changes and overrides you made?\n \n\n This page will be refreshed with new data:\n * {{ eventType }}\n Would you like to save your own changes before refreshing?",
+    "continue"
+  ],
+  [
+    "ok, can you do the whole itinerary so I have it in one response. I have an app to find EV chargers so don't need to include that.",
+    "I think we've gone wrong somewhere. We need to take the Eurotunnel at the latest on the 16th April. Is this still possible? I don't mind if some of the legs of the return journey involve more driving hours.",
+    "we want to arrive in Nice on 10th April to see our friends for at least 2 nights. Is this still possible within the timeframe? I don't mind driving up to 6 hours on some of the days to make it work. The only fixed things are that we cannot leave London until the 3rd April and we need to arrive back in the UK by 16th."
+  ],
+  [
+    "Hi Assistant, write me prototype code for UNet model, with 4 layers of encoder (feature extraction), and 3 decoder (the 4th of the encoder is in the middle) in pytorch. The arguments of the network will be in channels (default to 3) and list of integers representing gpu devices. The model should implement model parallelism and pipeline parallelism, and this is difficult due to skip connections. Can you do that? Use simple encoder layers, for simplicity. The main focus is the model / pipeline parallelism across 4 gpus.",
+    "Can you also write a pipeline parallelism wrapper for UNet?",
+    "yes, unet has skip connections so it cannot be written with a Sequential module as you've written it. Can you correct that? That is, the forward function is the one you send me before, but is not sequential."
+  ],
+  [
+    "I'm going to give you some topics now and I need notes for it. So please provide detailed notes for each",
+    "Sensors, transducers and application: Performance Terminology, Static and Dynamic Characteristics,\nDisplacement, Position and Proximity Sensors, Potentiometer Sensors, Strain Gauge Element, LVDT, Optical\nEncoders, Pneumatic Sensors, Hall Effect Sensors, Tachogenerators, Strain Gauge Load Cell, Thermostats,\nPhoto Darlington. Interfacing Sensors in Mechatronic System.",
+    "continue",
+    "System Interfacing and data acquisition:\nData acquisition systems, Data loggers, SCADA, Interfacing requirements, Buffers, Darlington Pair,\nHandshaking, Serial and Parallel Port Interfacing, Peripheral Interface Adapters, Analog to Digital Conversion,\nDigital To Analog Conversion, Sample and Hold Amplifiers, Multiplexers, Time Division Multiplexing, Digital\nSignal Processing, Pulse Modulation, Component Interconnection and Impedance Matching, Interfacing Motor\ndrives. Electrical power supply and protection"
+  ],
+  [
+    "ok lets make that dialog much richer - the spine rippers are like the vichy french (former good natured fellow species of the alien) of where the nazis are like the main antagonist of the advanced human. the low tech human was recucued by the high tech. the have an operator in orbit that can help with the mission. relate the mission to one that would fit in ww2. also relate mission parameters and details to the deal. talk values",
+    "ok great - but the alien doesnt know about ww2 history. the humans must use analogy - only the low tech human and the alien can bond - only the advanced human knows the history but cant explain it exceept through analogy that the alien needs to understand (they shoot projectiles from their bodies so can relate to bow hunters the most - and even can understand the concept of space battles and the larger galactic context to some extent",
+    "ok but now lets bring out some character development - the low tech lost an arm - the alien is old and has lost many tentacles. the high tech has lost his entire world. he can see the beauty of the aliens world - there is some much to loose - and this mission (to activate a buried mega structure) is critical. his world allowed a connection to the ancients and perhaps a way to win"
+  ],
+  [
+    "i have a similar code, explain the math used in it ```import numpy as np\nimport matplotlib.pyplot as plt\n# A simple harmonic oscillator\n# Part 1: Setting up the global variables (part a,b,c)\ngamma = 0\nF = 0\nk = 133.7 #Kg s^-2\nm = 6.66 #Kg\nx\\_0 = 0.30 # m; initial x-position\nv\\_0 = 0 # m/s; initial velocity in x\n\ndt = 0.001 # Our time differential\nt = np.arange(0,10,dt) # The time over which we run the simulation\nx = np.zeros(len(t)) # Make our x-positions array\n\nx[0] = x\\_0 # Set our initial conditions into our array\nx[1] = x\\_0 + v\\_0\\*dt\n\n# Start filling our positions (part d)\nfor i in range(len(t)-2): #we go need to stop 2 iterations before t ends, since we calculate at 2 indices in front of i\n F\\_spring = k \\* x[i] # Spring constant times our current position\n # If we want to add more forces (say, drag), we can use x[i+1] as velocity\n # and x[i] as position in the equation for those forces\n a = -F\\_spring / m # F = ma -> a = f/m\n x[i+2] = a\\*dt\\*\\*2 + 2\\*x[i+1] - x[i] # Use the forward-euler method\n\n# We now have a full array of x positions\n\nplt.plot(t,x,label='FWD Euler method')\nplt.plot(t,x\\_0\\*np.cos(np.sqrt(k/m)\\*t),label='Exact solution',linestyle='dashed',color = 'r')\nplt.legend(bbox\\_to\\_anchor = (1,1))\nplt.title('Forward Euler and Numerical solution compared')\nplt.xlabel('t')\nplt.ylabel('x')\nplt.show()\n\n#We can see that the forward euler method starts to deviate\n#This is caused by the limited resolution of the method;\n#Increasing dt will increase the accuracy```",
+    "why does this formula work? x[i+2] = a\\*dt\\*\\*2 + 2\\*x[i+1] - x[i]",
+    "can i use this formula in any forward euler method or just for this case of a harmonic oscillator?"
+  ]
+]

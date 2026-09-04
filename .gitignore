@@ -20,3 +20,9 @@ kubeconfig
 
 # Course material (not for redistribution)
 llm-d_Course.pdf
+
+# Reference clone of llm-d-deployer (not our code)
+llm-d-deployer/
+
+# Python virtual environment
+.venv/

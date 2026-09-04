@@ -6,10 +6,18 @@ metadata:
   region: us-east-1
   version: "1.31"
 
+iam:
+  withOIDC: true
+
+addons:
+  - name: aws-ebs-csi-driver
+    wellKnownPolicies:
+      ebsCSIController: true
+
 managedNodeGroups:
   - name: gpu-workers
     instanceType: g6.xlarge
-    amiFamily: AL2_x86_64_GPU
+    amiFamily: AmazonLinux2023
     desiredCapacity: 2
     minSize: 2
     maxSize: 2
