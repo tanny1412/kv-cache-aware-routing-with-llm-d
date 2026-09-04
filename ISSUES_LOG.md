@@ -149,4 +149,8 @@ Root cause: `kubectl port-forward` to a Service does **not** load-balance across
 
 Budget: $20-50 total.
 
-**Actual spend so far:** Session 1 — cluster up 2026-08-27 11:59 to 13:35 (~1h36m) verifying nodes/addons ≈ **$2.75**. Deleted before stepping away to avoid idle billing.
+**Actual spend so far:**
+- Session 1 — cluster up 2026-08-27 11:59-13:35 (~1h36m) verifying nodes/addons ≈ **$2.75**.
+- Session 2-4 (baseline deploy, benchmarks, llm-d debugging + deployment) — cluster up 2026-09-03 23:54 to 2026-09-04 ~01:15 (~1h20m) ≈ **$2.30**. Deleted after llm-d was validated end-to-end.
+
+Cluster is deliberately torn down between work sessions rather than left running, even mid-investigation — confirmed clean via `aws eks list-clusters` (empty) and `aws cloudformation describe-stacks` (stack not found) after each teardown.
