@@ -21,8 +21,9 @@ kubeconfig
 # Course material (not for redistribution)
 llm-d_Course.pdf
 
-# Reference clone of llm-d-deployer (not our code)
-llm-d-deployer/
+# Reference clones (not our code; our custom overlay files live in k8s/llm-d/)
+/llm-d-deployer/
+/llm-d/
 
 # Python virtual environment
 .venv/

@@ -14,7 +14,7 @@ llm-d addresses both with a smart Inference Gateway (EndpointPicker) and disaggr
 
 **Baseline:** 2 identical vLLM replicas behind a standard Kubernetes Service (round-robin load balancing), serving `meta-llama/Llama-3.2-3B-Instruct`.
 
-**llm-d:** Same 2 GPUs, reconfigured as 1 dedicated prefill worker + 1 dedicated decode worker, registered in a single `InferencePool` behind llm-d's Inference Gateway. The EndpointPicker (EPP) routes each request based on real-time KV-cache/GPU utilization signals rather than round-robin, and orchestrates the prefill → KV-cache-transfer → decode handoff via NIXL.
+**llm-d:** Same 2 GPUs, reconfigured as 1 dedicated prefill worker + 1 dedicated decode worker, registered in a single `InferencePool` behind llm-d's Router (Envoy sidecar + EndpointPicker, "Standalone Mode"). The EndpointPicker (EPP) routes each request based on real-time KV-cache/load signals rather than round-robin, and orchestrates the prefill → KV-cache-transfer → decode handoff via NIXL. Deployed from `llm-d/llm-d`'s `guides/pd-disaggregation` recipe, scaled down to fit a 2-GPU budget (`docker.io/vllm/vllm-openai:v0.26.0` for both roles, `llm-d-router-disagg-sidecar:v0.10.0`, `llm-d-router-endpoint-picker`) — see the custom `mini` overlay under that guide's `modelserver/gpu/vllm/` directory.
 
 > **Note on networking:** `g6.xlarge` nodes don't support RDMA-capable networking (e.g. AWS EFA), so NIXL falls back to its TCP transport for cross-node KV cache transfer instead of RDMA/InfiniBand. This means the absolute numbers here understate llm-d's best-case performance on production RDMA hardware — but the head-to-head comparison against the baseline is still valid, since it isolates the same variable (smart routing + disaggregation vs. none) under an equivalent network ceiling.
 
@@ -46,12 +46,11 @@ Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_ser
 
 - [x] Architecture research and benchmark design
 - [x] Provisioned GPU compute, hit and resolved infra blockers (see [`ISSUES_LOG.md`](./ISSUES_LOG.md))
-- [x] AWS GPU quota approved, EKS cluster config (`eks-cluster.yaml`) ready to launch
-- [ ] EKS cluster with GPU node group live
+- [x] EKS cluster with GPU node group live
 - [x] Baseline vLLM deployment live and validated (2 replicas, 1 GPU each, confirmed serving real completions)
-- [x] Benchmark #1 complete: baseline multi-turn cache-routing test (`benchmark/baseline_multiturn.json`) and load-curve test across concurrency 1-64 (`benchmark/baseline_load_curve.json`), both using real ShareGPT conversations/prompts
-- [ ] Deploy llm-d, re-run both benchmarks for comparison
-- [ ] llm-d deployment + benchmark run
+- [x] Benchmark #1 complete: baseline multi-turn cache-routing test and load-curve test across concurrency 1-64, both using real ShareGPT conversations/prompts
+- [x] llm-d deployed and validated end-to-end (real prefill/decode disaggregation + EPP router, confirmed serving real completions) — `llm-d-deployer` turned out to be abandoned upstream; switched to the current `llm-d/llm-d` "Standalone Mode" path and hand-wrote a scaled-down overlay to fit our 2-GPU budget (see Issues 9-10 in `ISSUES_LOG.md`)
+- [ ] Benchmark #2: re-run both benchmark scripts against llm-d for comparison
 - [ ] Results writeup and comparison
 
 See [`ISSUES_LOG.md`](./ISSUES_LOG.md) for a real-time log of problems hit along the way (e.g. RunPod's nested-container GPU pods not being privileged enough to run k3s) and how they were resolved — infra debugging is half the point of this project.

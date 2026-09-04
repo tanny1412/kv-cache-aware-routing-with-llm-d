@@ -1,0 +1,18 @@
+## Override for a 2x single-GPU-node budget cluster (g6.xlarge: ~3.92 vCPU / 14GB
+## allocatable each). base.values.yaml's defaults (EPP 4 CPU/8Gi + Envoy sidecar
+## 4 CPU/8Gi) are sized for production nodes and would never schedule here.
+router:
+  epp:
+    resources:
+      requests:
+        cpu: "250m"
+        memory: 512Mi
+      limits:
+        memory: 1Gi
+  proxy:
+    resources:
+      requests:
+        cpu: "250m"
+        memory: 512Mi
+      limits:
+        memory: 1Gi

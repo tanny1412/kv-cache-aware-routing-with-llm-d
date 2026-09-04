@@ -118,6 +118,26 @@ Root cause: `kubectl port-forward` to a Service does **not** load-balance across
 
 **Follow-up improvement:** initial in-cluster run used 6 short hand-written conversations (turn 1 avg 0.068s, turn 2+ avg 0.092s) — a real but modest gap, because short accumulated context makes a cache miss cheap to recompute even when it happens. Replaced hand-written prompts with 18 real conversations extracted from the actual ShareGPT dataset (`benchmark/extract_conversations.py`, selecting an even spread across the length distribution rather than the first N found) and raised generated-reply length (`max_tokens` 200 → 400) so accumulated context by turn 3-4 is substantially larger. Re-ran: **turn 1 avg TTFT 0.097s, turn 2+ avg TTFT 0.126s (n=54/123)** — a clearer ~30% gap, with individual cold-cache-miss outliers visibly spiking to 0.32-0.44s against a typical 0.08-0.15s range. This is the dataset used going forward (`benchmark/baseline_multiturn.json`).
 
+## Issue 9: `llm-d-deployer` is abandoned; the real llm-d install path moved elsewhere
+
+**What happened:** Deployed llm-d via the official `llm-d-deployer` quickstart (`llmd-installer.sh --storage-class gp3 --gateway kgateway --disable-metrics-collection`). Install completed with no errors, but the `ModelService` object never produced any prefill/decode pods. Debugging chain:
+
+1. `llm-d-modelservice` controller logs showed repeated errors: `no matches for kind "InferencePool" in version "inference.networking.x-k8s.io/v1alpha2"` — the installed CRDs used a *different* API group (`inference.networking.k8s.io`, the newer graduated/stable name) than what the controller's compiled code expected (`inference.networking.x-k8s.io`, the older experimental name). Root cause: the installer's `ci-deps.sh` pulls CRDs from an **unpinned live `main` branch reference** on `github.com/llm-d/llm-d-inference-scheduler`, decoupled from whichever `llm-d-deployer` version is running.
+2. Fixed by manually applying the correct CRD version (v0.3.0 of `kubernetes-sigs/gateway-api-inference-extension`, confirmed via the controller image's own `go.mod` pin) — this got prefill/decode/EPP pods created, but they then hit `ImagePullBackOff` on **three separate images** (`ghcr.io/llm-d/llm-d:0.0.8`, `llm-d-routing-sidecar:0.0.7`, `llm-d-inference-scheduler:v0.1.0`), all returning `403 DENIED` on even an anonymous token request — i.e. genuinely inaccessible, not a typo.
+3. Traced further: `llm-d/llm-d-inference-scheduler`'s GitHub repo itself returns `301 Moved Permanently` → renamed to `llm-d/llm-d-router`. And `llm-d-deployer`'s `main` branch and its latest tag (`llm-d-1.0.23`) point to the **exact same commit**, dated **2025-07-22** — the whole repo has been frozen for over a year while the rest of the project moved on and renamed/restructured around it.
+
+**Solution:** Abandoned `llm-d-deployer` entirely. Switched to the current official path: cloning `github.com/llm-d/llm-d` directly and using its `guides/pd-disaggregation` recipe, which uses properly version-pinned Helm charts (`oci://ghcr.io/llm-d/charts/llm-d-router-standalone`) and a real GAIE release download instead of an unpinned kustomize reference. Verified all three real images (`docker.io/vllm/vllm-openai:v0.26.0`, `ghcr.io/llm-d/llm-d-router-disagg-sidecar:v0.10.0`, `ghcr.io/llm-d/llm-d-router-endpoint-picker:main`) were actually pullable *before* committing to this path this time.
+
+**Status:** Resolved. Real lesson for the writeup: in a fast-moving pre-1.0 ecosystem, always check whether a "quickstart"/"deployer" repo is still actively maintained (compare its `main` branch's last commit date against its own latest tag) before trusting it, rather than assuming "official quickstart" means "current."
+
+## Issue 10: Official recipes are sized for production clusters, not a 2-GPU budget
+
+**What happened:** `guides/pd-disaggregation`'s reference config deploys **8 prefill instances (TP=1) + 2 decode instances (TP=4)** — 24 GPUs, for `openai/gpt-oss-120b`. `guides/optimized-baseline` (routing-only, no disaggregation) uses 8 replicas × TP=2 = 16 GPUs for `Qwen/Qwen3-32B`. Neither runs as-is on 2 GPUs.
+
+**Solution:** Hand-wrote a new Kustomize overlay (`llm-d/guides/pd-disaggregation/modelserver/gpu/vllm/mini/`, modeled on the existing `coreweave` overlay's pattern) scaling both prefill and decode to `replicas: 1`, `tensor-parallel-size: 1`, `nvidia.com/gpu: 1`, our own model (`meta-llama/Llama-3.2-3B-Instruct`), and reduced CPU/memory (1500m/6Gi each) to fit the `g6.xlarge`'s ~3.92 vCPU/14GB allocatable. Also added `router/mini.values.yaml` to shrink the router's default EPP+Envoy resource requests (default 8 CPU/16Gi combined — larger than an entire node) down to 500m CPU/1Gi combined.
+
+**Status:** Resolved — both prefill and decode reached `Running`/`Ready`, and a real end-to-end completion request through the EPP router succeeded.
+
 ## Cost tracking
 
 | Item | Est. cost |
