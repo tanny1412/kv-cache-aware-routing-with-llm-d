@@ -64,7 +64,11 @@ See [`ISSUES_LOG.md`](./ISSUES_LOG.md) for a real-time log of problems hit along
 
 TTFT holds under 75ms through concurrency 16, then climbs sharply — P90 reaches 219ms at concurrency 64, a ~4.8x increase over the single-request baseline — while throughput keeps scaling close to linearly. That gap between "throughput is fine" and "latency is degrading" is exactly the contention llm-d's disaggregated prefill/decode is meant to relieve; the llm-d curve will be overlaid here once that deployment and its matching benchmark run are complete.
 
-_Multi-turn cache-routing comparison (baseline vs. llm-d): pending llm-d deployment._
+**Baseline multi-turn cache-routing test** (same deployment — round-robin has no memory of which pod handled a conversation's earlier turns):
+
+![Baseline multi-turn TTFT: turn 1 vs turn 2+ distribution](./benchmark/baseline_multiturn.png)
+
+Turn 1 (n=54, no prior cache to hit or miss) stays tightly bounded between 48-155ms. Turn 2+ (n=123) has a long right tail — a minority of requests spike to 250-444ms — consistent with round-robin occasionally routing a follow-up to a cold replica, though less evenly split than a pure 50/50 coin flip would predict (mean 126ms vs. median 93ms — the average is pulled up by a smaller tail of slow outliers, not an even bimodal split). This is the pattern llm-d's cache-aware routing should flatten by consistently returning follow-ups to the replica that already has the conversation warm.
 
 ## Acknowledgments
 
