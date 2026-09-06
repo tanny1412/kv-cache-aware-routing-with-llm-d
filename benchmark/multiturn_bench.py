@@ -23,10 +23,6 @@ import time
 
 import httpx
 
-CONVERSATIONS_PATH = os.path.join(os.path.dirname(__file__), "real_conversations.json")
-with open(CONVERSATIONS_PATH) as f:
-    CONVERSATIONS = json.load(f)
-
 
 async def send_turn(client: httpx.AsyncClient, url: str, model: str, messages: list[dict]) -> tuple[float, str]:
     """Send one chat turn with streaming enabled; return (ttft_seconds, assistant_reply_text)."""
@@ -74,16 +70,21 @@ async def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--out", required=True, help="Path to write raw results JSON")
     parser.add_argument("--repeats", type=int, default=3, help="How many times to repeat the full concurrent batch")
+    parser.add_argument("--conversations-file", default="real_conversations.json", help="JSON file of conversations, relative to this script's directory")
     args = parser.parse_args()
+
+    conversations_path = os.path.join(os.path.dirname(__file__), args.conversations_file)
+    with open(conversations_path) as f:
+        conversations = json.load(f)
 
     all_results = []
     async with httpx.AsyncClient() as client:
         for r in range(args.repeats):
-            print(f"\n=== Batch {r + 1}/{args.repeats}: launching {len(CONVERSATIONS)} concurrent conversations ===")
+            print(f"\n=== Batch {r + 1}/{args.repeats}: launching {len(conversations)} concurrent conversations ===")
             batch_results = []
             await asyncio.gather(*[
                 run_conversation(client, args.url, args.model, conv_id, turns, batch_results)
-                for conv_id, turns in enumerate(CONVERSATIONS)
+                for conv_id, turns in enumerate(conversations)
             ])
             all_results.extend(batch_results)
 

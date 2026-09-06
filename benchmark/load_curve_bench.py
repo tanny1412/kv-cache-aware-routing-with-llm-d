@@ -12,13 +12,10 @@ Usage:
 import argparse
 import asyncio
 import json
+import os
 import time
 
 import httpx
-
-PROMPTS_PATH = __file__.rsplit("/", 1)[0] + "/load_curve_prompts.json"
-with open(PROMPTS_PATH) as f:
-    PROMPTS = json.load(f)
 
 CONCURRENCY_LEVELS = [1, 4, 8, 16, 32, 64]
 REPEATS_PER_LEVEL = 2
@@ -61,8 +58,8 @@ def percentile(values: list[float], p: float) -> float:
     return s[min(idx, len(s) - 1)]
 
 
-async def run_concurrency_level(client: httpx.AsyncClient, url: str, model: str, concurrency: int) -> dict:
-    prompts = [PROMPTS[i % len(PROMPTS)] for i in range(concurrency)]
+async def run_concurrency_level(client: httpx.AsyncClient, url: str, model: str, concurrency: int, all_prompts: list[str]) -> dict:
+    prompts = [all_prompts[i % len(all_prompts)] for i in range(concurrency)]
     batch_start = time.monotonic()
     results = await asyncio.gather(*[send_request(client, url, model, p) for p in prompts])
     wall_time = time.monotonic() - batch_start
@@ -85,14 +82,19 @@ async def main():
     parser.add_argument("--url", required=True)
     parser.add_argument("--model", required=True)
     parser.add_argument("--out", required=True)
+    parser.add_argument("--prompts-file", default="load_curve_prompts.json", help="JSON file of prompts, relative to this script's directory")
     args = parser.parse_args()
+
+    prompts_path = os.path.join(os.path.dirname(__file__), args.prompts_file)
+    with open(prompts_path) as f:
+        all_prompts = json.load(f)
 
     all_results = []
     async with httpx.AsyncClient() as client:
         for concurrency in CONCURRENCY_LEVELS:
             for rep in range(REPEATS_PER_LEVEL):
                 print(f"=== Concurrency {concurrency}, repeat {rep + 1}/{REPEATS_PER_LEVEL} ===")
-                stats = await run_concurrency_level(client, args.url, args.model, concurrency)
+                stats = await run_concurrency_level(client, args.url, args.model, concurrency, all_prompts)
                 print(f"  avg TTFT={stats['avg_ttft']:.3f}s  p50={stats['p50_ttft']:.3f}s  "
                       f"p90={stats['p90_ttft']:.3f}s  throughput={stats['throughput_tokens_per_sec']:.1f} tok/s")
                 all_results.append(stats)
