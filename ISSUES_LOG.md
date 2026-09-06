@@ -138,6 +138,18 @@ Root cause: `kubectl port-forward` to a Service does **not** load-balance across
 
 **Status:** Resolved — both prefill and decode reached `Running`/`Ready`, and a real end-to-end completion request through the EPP router succeeded.
 
+## Result: llm-d underperformed the baseline — and why that's a real, useful finding
+
+**What happened:** Ran both benchmark scripts against the completed llm-d deployment (`benchmark/llmd_multiturn.json`, `benchmark/llmd_load_curve.json`) and compared against the existing baseline data. Contrary to the "smart routing helps" hypothesis, llm-d showed **higher TTFT and lower throughput than the plain baseline at every concurrency level**, and higher TTFT on both turn 1 and turn 2+ in the multi-turn test (turn 1: 1247ms mean vs. baseline's 97ms; turn 2+: 521ms mean vs. baseline's 126ms).
+
+**Why:** every request in the disaggregated setup — including turn 1, which has no cache-locality question at all — pays for an extra network hop plus a cross-pod NIXL KV-cache transfer, which the baseline's single-process architecture doesn't have. `g6.xlarge` has no RDMA-capable interconnect (no AWS EFA), so NIXL falls back to its TCP transport, documented upstream as "extremely slow... targeted for local development" rather than the fast path the architecture assumes. For a 3B model with short-to-medium prompts, that fixed per-request tax outweighs any benefit disaggregation could offer on this hardware.
+
+**The mechanism still shows through:** within llm-d's own results, turn 2+ is ~58% faster than turn 1 — real evidence that cache/session-aware routing is doing something directionally correct — just not enough to overcome the >10x gap opened by TCP-bound NIXL transfer at this scale.
+
+**Matches llm-d's own documented guidance:** the `pd-disaggregation` guide explicitly recommends disaggregation for "medium-large models... longer input sequence lengths (e.g. 10k ISL | 1k OSL, not 200 ISL | 200 OSL)" — almost a direct description of what our setup is *not*. This is a genuine, workload-dependent engineering tradeoff, not a bug in the deployment.
+
+**Status:** This is the project's core result, written up in full in the README's "Results" section with comparison charts (`benchmark/comparison_load_curve.png`, `benchmark/comparison_multiturn.png`).
+
 ## Cost tracking
 
 | Item | Est. cost |

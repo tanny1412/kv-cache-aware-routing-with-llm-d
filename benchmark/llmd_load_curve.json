@@ -1,0 +1,98 @@
+[
+  {
+    "concurrency": 1,
+    "wall_time_seconds": 5.3866662010000255,
+    "avg_ttft": 0.13388287500015394,
+    "p50_ttft": 0.13388287500015394,
+    "p90_ttft": 0.13388287500015394,
+    "throughput_tokens_per_sec": 37.128716080990934
+  },
+  {
+    "concurrency": 1,
+    "wall_time_seconds": 5.372676197999908,
+    "avg_ttft": 0.11707547099990734,
+    "p50_ttft": 0.11707547099990734,
+    "p90_ttft": 0.11707547099990734,
+    "throughput_tokens_per_sec": 37.22539617676089
+  },
+  {
+    "concurrency": 4,
+    "wall_time_seconds": 5.660989557999983,
+    "avg_ttft": 0.29422085525004604,
+    "p50_ttft": 0.2941619069999888,
+    "p90_ttft": 0.29500145100018926,
+    "throughput_tokens_per_sec": 141.31804904488087
+  },
+  {
+    "concurrency": 4,
+    "wall_time_seconds": 5.703257494999889,
+    "avg_ttft": 0.315854730500007,
+    "p50_ttft": 0.3157871119999527,
+    "p90_ttft": 0.3170570869999665,
+    "throughput_tokens_per_sec": 140.27071383351867
+  },
+  {
+    "concurrency": 8,
+    "wall_time_seconds": 6.067442367000012,
+    "avg_ttft": 0.6037557710000101,
+    "p50_ttft": 0.6040452469999309,
+    "p90_ttft": 0.605220109000129,
+    "throughput_tokens_per_sec": 263.70254601876087
+  },
+  {
+    "concurrency": 8,
+    "wall_time_seconds": 6.05341019399998,
+    "avg_ttft": 0.570829859624979,
+    "p50_ttft": 0.5647907620000296,
+    "p90_ttft": 0.5911474859999544,
+    "throughput_tokens_per_sec": 264.31382455890537
+  },
+  {
+    "concurrency": 16,
+    "wall_time_seconds": 6.7211238019999655,
+    "avg_ttft": 1.1477576528125013,
+    "p50_ttft": 1.1477911720000975,
+    "p90_ttft": 1.1499604210000598,
+    "throughput_tokens_per_sec": 474.77179323054173
+  },
+  {
+    "concurrency": 16,
+    "wall_time_seconds": 6.683450687000004,
+    "avg_ttft": 0.8242211618750162,
+    "p50_ttft": 1.1212321420000535,
+    "p90_ttft": 1.1239607710001565,
+    "throughput_tokens_per_sec": 473.70739282302094
+  },
+  {
+    "concurrency": 32,
+    "wall_time_seconds": 8.084041706000107,
+    "avg_ttft": 1.6001190856250034,
+    "p50_ttft": 1.609634786000015,
+    "p90_ttft": 1.7764948259998619,
+    "throughput_tokens_per_sec": 791.3120976666959
+  },
+  {
+    "concurrency": 32,
+    "wall_time_seconds": 8.030258036000077,
+    "avg_ttft": 1.3437431608750146,
+    "p50_ttft": 1.5212069020001309,
+    "p90_ttft": 1.7826090260000456,
+    "throughput_tokens_per_sec": 791.7553796524028
+  },
+  {
+    "concurrency": 64,
+    "wall_time_seconds": 10.558967473000166,
+    "avg_ttft": 2.676054708296885,
+    "p50_ttft": 2.689351514000009,
+    "p90_ttft": 3.912080428000081,
+    "throughput_tokens_per_sec": 1185.3431722376329
+  },
+  {
+    "concurrency": 64,
+    "wall_time_seconds": 10.518946325000115,
+    "avg_ttft": 2.6591233461718566,
+    "p50_ttft": 2.679877630999954,
+    "p90_ttft": 3.906007346000024,
+    "throughput_tokens_per_sec": 1215.9012514021797
+  }
+]

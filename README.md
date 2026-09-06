@@ -50,8 +50,8 @@ Both deployments are load-tested with identical traffic (`vllm`'s `benchmark_ser
 - [x] Baseline vLLM deployment live and validated (2 replicas, 1 GPU each, confirmed serving real completions)
 - [x] Benchmark #1 complete: baseline multi-turn cache-routing test and load-curve test across concurrency 1-64, both using real ShareGPT conversations/prompts
 - [x] llm-d deployed and validated end-to-end (real prefill/decode disaggregation + EPP router, confirmed serving real completions) — `llm-d-deployer` turned out to be abandoned upstream; switched to the current `llm-d/llm-d` "Standalone Mode" path and hand-wrote a scaled-down overlay to fit our 2-GPU budget (see Issues 9-10 in `ISSUES_LOG.md`)
-- [ ] Benchmark #2: re-run both benchmark scripts against llm-d for comparison
-- [ ] Results writeup and comparison
+- [x] Benchmark #2 complete: both benchmark scripts re-run against llm-d for direct comparison
+- [x] Results writeup and comparison — see below
 
 See [`ISSUES_LOG.md`](./ISSUES_LOG.md) for a real-time log of problems hit along the way (e.g. RunPod's nested-container GPU pods not being privileged enough to run k3s) and how they were resolved — infra debugging is half the point of this project.
 
@@ -61,13 +61,27 @@ See [`ISSUES_LOG.md`](./ISSUES_LOG.md) for a real-time log of problems hit along
 
 ![Baseline load curve: TTFT and throughput vs. concurrency](./benchmark/baseline_load_curve.png)
 
-TTFT holds under 75ms through concurrency 16, then climbs sharply — P90 reaches 219ms at concurrency 64, a ~4.8x increase over the single-request baseline — while throughput keeps scaling close to linearly. That gap between "throughput is fine" and "latency is degrading" is exactly the contention llm-d's disaggregated prefill/decode is meant to relieve; the llm-d curve will be overlaid here once that deployment and its matching benchmark run are complete.
+TTFT holds under 75ms through concurrency 16, then climbs sharply — P90 reaches 219ms at concurrency 64, a ~4.8x increase over the single-request baseline — while throughput keeps scaling close to linearly. That gap between "throughput is fine" and "latency is degrading" is exactly the contention llm-d's disaggregated prefill/decode is meant to relieve.
 
 **Baseline multi-turn cache-routing test** (same deployment — round-robin has no memory of which pod handled a conversation's earlier turns):
 
 ![Baseline multi-turn TTFT: turn 1 vs turn 2+ distribution](./benchmark/baseline_multiturn.png)
 
-Turn 1 (n=54, no prior cache to hit or miss) stays tightly bounded between 48-155ms. Turn 2+ (n=123) has a long right tail — a minority of requests spike to 250-444ms — consistent with round-robin occasionally routing a follow-up to a cold replica, though less evenly split than a pure 50/50 coin flip would predict (mean 126ms vs. median 93ms — the average is pulled up by a smaller tail of slow outliers, not an even bimodal split). This is the pattern llm-d's cache-aware routing should flatten by consistently returning follow-ups to the replica that already has the conversation warm.
+Turn 1 (n=54, no prior cache to hit or miss) stays tightly bounded between 48-155ms. Turn 2+ (n=123) has a long right tail — a minority of requests spike to 250-444ms — consistent with round-robin occasionally routing a follow-up to a cold replica, though less evenly split than a pure 50/50 coin flip would predict (mean 126ms vs. median 93ms — the average is pulled up by a smaller tail of slow outliers, not an even bimodal split).
+
+### llm-d vs. baseline — the actual comparison
+
+![Baseline vs llm-d: TTFT and throughput vs. concurrency](./benchmark/comparison_load_curve.png)
+
+![Baseline vs llm-d: multi-turn TTFT](./benchmark/comparison_multiturn.png)
+
+**The headline result is not what the "smart routing helps" story predicts: in this setup, llm-d is slower and lower-throughput than the plain baseline at every concurrency level, and slower on both turn 1 and turn 2+ in the multi-turn test.** That's a real, honestly-measured result, and it's worth explaining precisely rather than either overclaiming a win or dismissing it as a bug — it isn't one.
+
+**Why:** disaggregation isn't free. Every single request in the P/D setup — including turn 1, which has no cache to route around at all — pays for an extra network hop and a cross-pod NIXL KV-cache transfer that the baseline's single-hop architecture simply doesn't have (baseline does prefill and decode in the same process). Recall the earlier networking caveat: `g6.xlarge` nodes have no RDMA-capable interconnect (no AWS EFA), so NIXL falls back to its TCP transport — which NIXL's own docs describe as "extremely slow... targeted for local development," not the fast path the architecture is designed around. For a small 3B model with short-to-medium prompts, that per-request tax outweighs any benefit disaggregation could provide, on this hardware.
+
+**The mechanism still shows through, just not enough to win overall:** within llm-d's own numbers, turn 2+ (mean 521ms) is a real ~58% faster than turn 1 (mean 1247ms) — evidence that session/cache-aware routing is doing *something* directionally correct — it just isn't enough to close a >10x architectural gap opened by TCP-bound NIXL transfer on hardware this small.
+
+**This actually matches llm-d's own documented guidance**, which we found while building the deployment: the `pd-disaggregation` guide explicitly recommends disaggregation for *"medium-large models... longer input sequence lengths (e.g. 10k ISL | 1k OSL, not 200 ISL | 200 OSL)"* — almost a direct description of what our setup is *not*. Our workload (a 3B model, short prompts, no RDMA) sits squarely in the regime llm-d's own maintainers say disaggregation isn't targeted at. The honest conclusion isn't "llm-d doesn't work" — it's "disaggregation is a real engineering tradeoff with a workload- and hardware-dependent break-even point, and this project measured which side of that line a small-model / no-RDMA / short-prompt deployment falls on."
 
 ## Acknowledgments
 
